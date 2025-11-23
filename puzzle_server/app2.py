@@ -9,7 +9,9 @@ app = Flask(__name__, static_folder='static', template_folder='templates')
 
 # Load ground truth data for a specific type
 def load_ground_truth(captcha_type):
-    path = os.path.join('captcha_data', captcha_type, 'ground_truth.json')
+    # Use absolute path from the script's directory
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    path = os.path.join(base_dir, 'captcha_data', captcha_type, 'ground_truth.json')
     try:
         with open(path, 'r') as f:
             return json.load(f)
@@ -18,7 +20,8 @@ def load_ground_truth(captcha_type):
 
 # Get available CAPTCHA types
 def get_captcha_types():
-    base_dir = 'captcha_data'
+    # Use absolute path from the script's directory
+    base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'captcha_data')
     if not os.path.exists(base_dir):
         return []
     return [d for d in os.listdir(base_dir)

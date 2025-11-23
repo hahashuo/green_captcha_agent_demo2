@@ -3,8 +3,10 @@ import asyncio
 import contextlib
 import json
 import logging
+import os
 import random
 import shlex
+import sys
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -102,8 +104,7 @@ class CaptchaJudge(GreenAgent):
         configured_type = req.config.get("captcha_type")
         configured_puzzle_id = req.config.get("puzzle_id")
         app_cmd = req.config.get("captcha_app_cmd")
-        default_app_path = "/Users/chenhaishuo/Documents/OPENCAPTCHAWORLD/app2.py"
-        app_path = Path(req.config.get("captcha_app_path", default_app_path))
+        app_path = Path(__file__).parent.parent.parent / "puzzle_server" / "app2.py"
 
         logger.info(
             "Starting CAPTCHA judge with host=%s port=%s type=%s puzzle=%s app_cmd=%s app_path=%s",
@@ -177,24 +178,38 @@ class CaptchaJudge(GreenAgent):
     ) -> asyncio.subprocess.Process:
         if app_cmd:
             cmd = shlex.split(app_cmd)
+            working_dir = Path.cwd()
         else:
             if not app_path.exists():
                 raise RuntimeError(f"CAPTCHA app path not found: {app_path}")
-            cmd = ["python", str(app_path), "--host", host, "--port", str(port)]
+            # Use sys.executable to ensure we use the same Python environment
+            cmd = [sys.executable, str(app_path), "--host", str(host), "--port", str(port)]
+            # Set working directory to project root so relative paths work correctly
+            working_dir = app_path.parent.parent
 
         await updater.update_status(
             TaskState.working,
-            new_agent_text_message(f"Launching CAPTCHA Flask app with command: {' '.join(cmd)}"),
+            new_agent_text_message(f"Launching CAPTCHA Flask app with command: {' '.join(cmd)} in directory: {working_dir}"),
         )
-        logger.info("Launching Flask app: %s", cmd)
+        logger.info("Launching Flask app: %s in %s", cmd, working_dir)
         try:
             process = await asyncio.create_subprocess_exec(
                 *cmd,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.STDOUT,
+                cwd=working_dir,
+                env=os.environ.copy(),  # Pass current environment variables
             )
         except FileNotFoundError as exc:
             raise RuntimeError(f"Failed to start Flask app: {exc}") from exc
+
+        # Give the process a moment to start and check if it's still running
+        await asyncio.sleep(1.0)
+        if process.returncode is not None:
+            # Process exited immediately, try to capture output
+            output = await process.stdout.read() if process.stdout else b""
+            output_str = output.decode('utf-8', errors='replace')
+            raise RuntimeError(f"Flask app exited immediately with code {process.returncode}. Output: {output_str}")
 
         asyncio.create_task(self._log_process_output(process))
         return process

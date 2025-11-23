@@ -10,6 +10,5 @@ cmd = "python scenarios/captcha/captcha_solver.py --host 127.0.0.1 --port 9019"
 [config]
 captcha_type = 'none'
 puzzle_id = 'none'
-captcha_host = "http://127.0.0.1"
+captcha_host = "127.0.0.1"
 captcha_port = 7861
-captcha_app_path = "/Users/chenhaishuo/Documents/OpenCaptchaWorld/app2.py"

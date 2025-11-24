@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAPTCHA Puzzle Viewer</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        /* Additional styling */
+        .input-group {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 15px 0;
+            width: 100%;
+        }
+        #user-answer {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #ccc;
+            border-radius: 4px;
+            margin-right: 10px;
+            font-size: 16px;
+        }
+        #download-result {
+            padding: 10px 20px;
+            background-color: #2196F3;
+            border: none;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+        #download-result:hover {
+            background-color: #0b7dda;
+        }
+        #download-result:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .error-message {
+            padding: 20px;
+            background-color: #ffebee;
+            border-left: 4px solid #f44336;
+            border-radius: 4px;
+            color: #c62828;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CAPTCHA Puzzle Viewer</h1>
+
+        <div class="puzzle-container" id="puzzle-container">
+            <div class="puzzle-image-wrapper">
+                <div class="puzzle-image-container">
+                    <img id="puzzle-image" src="" alt="CAPTCHA Puzzle">
+                </div>
+            </div>
+            <div class="puzzle-question">
+                <h3 id="puzzle-prompt">Loading puzzle...</h3>
+                <div class="input-group">
+                    <input type="text" id="user-answer" placeholder="Your answer">
+                    <button id="download-result">Download Result</button>
+                </div>
+                <div id="result-message" class="result-message"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/script2.js"></script>
+</body>
+</html>
